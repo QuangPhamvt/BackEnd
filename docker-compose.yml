@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  back-end:
+    container_name: back-end-project
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./package.json:/usr/src/app/package.json
+      - ./package-lock.json:/usr/src/app/package-lock.json
+    command: npm run start:dev
+    env_file:
+      - .env
+    environment:
+      - DATABASE_HOST=database
+    networks:
+      - network-project
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - database 
+  database:
+    container_name: mysql
+    image: mysql:8.0
+    command: '--default-authentication-plugin=mysql_native_password'
+    restart: always
+    networks:
+      - network-project
+    environment: 
+      MYSQL_DATABASE: ${DATABASE_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - project:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+networks:
+  network-project:
+volumes:
+  project: 
